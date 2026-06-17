@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task Management Application</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#f4f4f4;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    min-height:100vh;
+    padding-top:50px;
+}
+
+.container{
+    width:500px;
+    background:#fff;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.2);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:20px;
+    color:#333;
+}
+
+.input-section{
+    display:flex;
+    gap:10px;
+}
+
+input{
+    flex:1;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    font-size:16px;
+}
+
+button{
+    padding:10px 15px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    color:white;
+}
+
+.add-btn{
+    background:#28a745;
+}
+
+.add-btn:hover{
+    background:#218838;
+}
+
+ul{
+    list-style:none;
+    margin-top:20px;
+}
+
+li{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#f8f9fa;
+    padding:12px;
+    margin-bottom:10px;
+    border-radius:5px;
+}
+
+.completed{
+    text-decoration:line-through;
+    color:gray;
+}
+
+.actions button{
+    margin-left:5px;
+}
+
+.complete-btn{
+    background:#007bff;
+}
+
+.complete-btn:hover{
+    background:#0056b3;
+}
+
+.delete-btn{
+    background:#dc3545;
+}
+
+.delete-btn:hover{
+    background:#c82333;
+}
+
+@media(max-width:600px){
+    .container{
+        width:95%;
+    }
+
+    .input-section{
+        flex-direction:column;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Task Management Application</h1>
+
+    <div class="input-section">
+        <input type="text" id="taskInput" placeholder="Enter a task...">
+        <button class="add-btn" onclick="addTask()">Add Task</button>
+    </div>
+
+    <ul id="taskList"></ul>
+</div>
+
+<script>
+const taskList = document.getElementById("taskList");
+const taskInput = document.getElementById("taskInput");
+
+// Load tasks when page opens
+document.addEventListener("DOMContentLoaded", loadTasks);
+
+// Add task on Enter key
+taskInput.addEventListener("keypress", function(event){
+    if(event.key === "Enter"){
+        addTask();
+    }
+});
+
+function addTask(){
+    const text = taskInput.value.trim();
+
+    if(text === ""){
+        alert("Please enter a task!");
+        return;
+    }
+
+    const task = {
+        text:text,
+        completed:false
+    };
+
+    saveTask(task);
+    createTaskElement(task);
+
+    taskInput.value = "";
+}
+
+function createTaskElement(task){
+    const li = document.createElement("li");
+
+    if(task.completed){
+        li.classList.add("completed");
+    }
+
+    const span = document.createElement("span");
+    span.textContent = task.text;
+
+    const actions = document.createElement("div");
+    actions.classList.add("actions");
+
+    const completeBtn = document.createElement("button");
+    completeBtn.textContent = task.completed ? "Undo" : "Complete";
+    completeBtn.classList.add("complete-btn");
+
+    completeBtn.onclick = function(){
+        li.classList.toggle("completed");
+
+        if(li.classList.contains("completed")){
+            completeBtn.textContent = "Undo";
+        }else{
+            completeBtn.textContent = "Complete";
+        }
+
+        toggleTask(task.text);
+    };
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Delete";
+    deleteBtn.classList.add("delete-btn");
+
+    deleteBtn.onclick = function(){
+        li.remove();
+        removeTask(task.text);
+    };
+
+    actions.appendChild(completeBtn);
+    actions.appendChild(deleteBtn);
+
+    li.appendChild(span);
+    li.appendChild(actions);
+
+    taskList.appendChild(li);
+}
+
+function saveTask(task){
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    tasks.push(task);
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+function loadTasks(){
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    tasks.forEach(task => {
+        createTaskElement(task);
+    });
+}
+
+function removeTask(taskText){
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    tasks = tasks.filter(task => task.text !== taskText);
+
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+function toggleTask(taskText){
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    tasks = tasks.map(task => {
+        if(task.text === taskText){
+            task.completed = !task.completed;
+        }
+        return task;
+    });
+
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+</script>
+
+</body>
+</html>
